@@ -44,6 +44,14 @@ public class Utils {
         return (sequenceNumber + 1) & 0xFFFF;
     }
 
+    // Function to compare two 16-bit sequence numbers, taking the wrap-around at 65535 into account
+    // @param sequence The sequence number to test
+    // @param reference The reference sequence number (for example the last acknowledged one)
+    // @return true if sequence is equal to reference or comes before it (within half of the sequence space)
+    public static boolean isSequenceAtOrBefore(int sequence, int reference) {
+        return ((reference - sequence) & 0xFFFF) < 0x8000;
+    }
+
     // Function to format a log message for terminal output
     // @param role The role of the sender (e.g., "SENDER" or "RECEIVER")
     // @param message The log message to be formatted

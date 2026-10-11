@@ -144,21 +144,24 @@ public class Sender {
             // The sender will keep sending packets within the window and wait for ACKs. If a timeout occurs or 3 duplicate ACKs are received, it will trigger retransmission of the unacknowledged packets.
             while (base < totalPacketQuantity) {
 
-            // If not in retransmission mode, send new packets within the window
-            // If in retransmission mode, resend all unacknowledged packets starting from the base index
-                if (!retransmissionFlag) {
-                    while (nextIndexNum < totalPacketQuantity && nextIndexNum - base < windowSize) {
+                // Send every packet of the window that has not been sent yet.
+                // After a timeout or a fast retransmission, nextIndexNum is reset to base,
+                // so this loop resends all unacknowledged packets (Go-Back-N).
+                if (retransmissionFlag) {
+                    System.out.println(Utils.terminalLog("SENDER", "Retransmitting from window base index " + base));
+                    retransmissionFlag = false;
+                }
+                while (nextIndexNum < totalPacketQuantity && nextIndexNum - base < windowSize) {
 
-                        int seqNum = sequences[nextIndexNum];
-                        byte[] payload = packetsBuffers[nextIndexNum];
-                        Object.Packet dataPacket = new Object.Packet(payload.length, seqNum, false, false, false, false, payload);
-                        Utils.sendPacket(socket, dataPacket, connectedInfo.address, connectedInfo.port);
-                        pending.put(seqNum, payload);
-                        System.out.println(Utils.terminalLog("SENDER", "Sent packet with sequence number: " + seqNum));
-                        nextIndexNum++;
-                        packetSent++;
-                        bytes += payload.length;
-                    }
+                    int seqNum = sequences[nextIndexNum];
+                    byte[] payload = packetsBuffers[nextIndexNum];
+                    Object.Packet dataPacket = new Object.Packet(payload.length, seqNum, false, false, false, false, payload);
+                    Utils.sendPacket(socket, dataPacket, connectedInfo.address, connectedInfo.port);
+                    pending.put(seqNum, payload);
+                    System.out.println(Utils.terminalLog("SENDER", "Sent packet with sequence number: " + seqNum));
+                    nextIndexNum++;
+                    packetSent++;
+                    bytes += payload.length;
                 }
 
                 // Wait for ACK
@@ -202,7 +205,7 @@ public class Sender {
                         
                         // Advance base only up to the last contiguous acknowledged packet (cumulative ACK)
                         int oldBase = base;
-                        while (base < totalPacketQuantity && sequences[base] <= ackedSequence) {
+                        while (base < totalPacketQuantity && Utils.isSequenceAtOrBefore(sequences[base], ackedSequence)) {
                             pending.remove(sequences[base]);
                             System.out.println(Utils.terminalLog("SENDER", "Removing from pending: seq=" + sequences[base]));
                             base++;
@@ -216,6 +219,7 @@ public class Sender {
                 }catch(Exception e) {
                     System.out.println(Utils.terminalLog("SENDER", "Timeout occurred. Triggering retransmission."));
                     nextIndexNum = base;
+                    retransmissionFlag = true;
 
                 }
             }
