@@ -1,0 +1,61 @@
+PROJET RÉSEAU - BUILD
+
+Prérequis :
+
+-	Java 17 (ou version plus récente)
+-	Javac compiler disponible dans le PATH
+
+Compilation : 
+
+Commande de compilation : 
+
+      " javac -release 17 *.java "
+      Ou 
+      " javac *.java "
+
+Fichiers disponibles après compilation : 
+
+-	Object.class
+-	Object$Packet.class
+-	Object$connectedInfo.class
+-	Object.java
+-	Sender.class
+-	Sender.java
+-	Receiver.class
+-	Receiver.java
+-	Utils.class
+-	Utils.java
+
+Méthode d'exécution du programme : 
+
+    Récepteur
+
+        Execution :
+            " java Receiver <port> <output_file_path> "
+
+        Paramètres : 
+
+        port : Numéro de port sur lequel le receiver écoutera.
+
+        output_file_path : Fichier ou les données seront récupérer et récris (.txt si text , .jpg si image , etc).
+
+        Exemple : 
+            " Java Receiver 5000 output.txt "
+
+    Emetteur
+
+        Execution : 
+            " java Sender <receiver_ip> <port> <input_file_path> "
+
+        Paramètres: 
+
+            receiver_ip : Adresse IPV4 de l'appareil exécutant le récepteur.
+
+            port : Port sur lequel le récepteur écoute et l'émetteur envoie ses 
+            demandes, paquets et autres.
+
+            input_file_path : Fichier duquel les données seront récupérées et envoyé 
+            au récepteur. Fichier à créer au préalable.
+
+        Exemple : 
+            " java Sender 127.0.0.1 5000 input.txt "
